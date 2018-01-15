@@ -25,6 +25,24 @@ using System.Windows.Forms;
 
 namespace ODEditor
 {
+    public class TransPanel : Panel
+    {
+        protected override CreateParams CreateParams
+        {
+            get
+            {
+                CreateParams cp = base.CreateParams;
+                cp.ExStyle |= 0x20;
+                return cp;
+            }
+        }
+
+        protected override void OnPaintBackground(PaintEventArgs e)
+        {
+            //base.OnPaintBackground(e);
+            //Don't paint the background
+        }
+    }
     static class Program
     {
         /// <summary>

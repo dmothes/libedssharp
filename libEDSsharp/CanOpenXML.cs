@@ -125,6 +125,8 @@ namespace Xml2CSharp
 
 	[XmlRoot(ElementName="CANopenObject")]
 	public class CANopenObject {
+        private string _attribute;
+
 		[XmlElement(ElementName="label")]
 		public Label Label { get; set; }
 		[XmlElement(ElementName="description")]
@@ -134,10 +136,15 @@ namespace Xml2CSharp
 		[XmlAttribute(AttributeName="name")]
 		public string Name { get; set; }
 		[XmlAttribute(AttributeName="objectType")]
+
 		public string ObjectType { get; set; }
-		[XmlAttribute(AttributeName="memoryType")]
-		public string MemoryType { get; set; }
-		[XmlAttribute(AttributeName="dataType")]
+        [XmlAttribute(AttributeName = "subNumber")]
+        public string SubNumber { get; set; }
+        [XmlAttribute(AttributeName="memoryType")]
+        public string MemoryType { get; set; }
+        [XmlAttribute(AttributeName = "accessFunctionName")]
+        public string AccessFunctionName { get; set; }
+        [XmlAttribute(AttributeName="dataType")]
 		public string DataType { get; set; }
 		[XmlAttribute(AttributeName="accessType")]
 		public string AccessType { get; set; }
@@ -147,16 +154,15 @@ namespace Xml2CSharp
 		public string DefaultValue { get; set; }
 		[XmlElement(ElementName="CANopenSubObject")]
 		public List<CANopenSubObject> CANopenSubObject { get; set; }
-		[XmlAttribute(AttributeName="subNumber")]
-		public string SubNumber { get; set; }
-		[XmlAttribute(AttributeName="accessFunctionName")]
-		public string AccessFunctionName { get; set; }
 		[XmlAttribute(AttributeName="disabled")]
 		public string Disabled { get; set; }
 		[XmlElement(ElementName="accessFunctionPreCode")]
 		public string AccessFunctionPreCode { get; set; }
 		[XmlAttribute(AttributeName="TPDOdetectCOS")]
 		public string TPDOdetectCOS { get; set; }
+
+        [XmlAttribute(AttributeName = "toDCF")]
+        public string toDCF { get; set; }
     }
 
 	[XmlRoot(ElementName="CANopenSubObject")]
@@ -177,6 +183,9 @@ namespace Xml2CSharp
 		public string DefaultValue { get; set; }
         [XmlAttribute(AttributeName = "TPDOdetectCOS")]
         public string TPDOdetectCOS { get; set; }
+
+        [XmlAttribute(AttributeName = "toDCF")]
+        public string toDCF { get; set; }
     }
 
 	[XmlRoot(ElementName="CANopenObjectList")]

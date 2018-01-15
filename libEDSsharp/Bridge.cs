@@ -57,7 +57,11 @@ namespace libEDSsharp
                     Xml2CSharp.CANopenObject coo = new Xml2CSharp.CANopenObject();
                     coo.Index = string.Format("{0:x4}", od.index);
                     coo.Name = od.parameter_name;
-                    coo.ObjectType = od.objecttype.ToString();
+                    if (coo.Label == null)
+                        coo.Label = new Label();
+                    coo.Label.Lang = "en";
+                    coo.Label.Text = od.parameter_name;
+                    coo.ObjectType = Convert.ToInt32((int)od.objecttype).ToString();
                     coo.Disabled = od.Disabled.ToString().ToLower();
                     coo.MemoryType = od.StorageLocation;
                     eds.storageLocation.Add(od.StorageLocation);
@@ -66,10 +70,12 @@ namespace libEDSsharp
                     coo.DefaultValue = od.defaultvalue;
                     coo.PDOmapping = od.PDOtype.ToString();
                     coo.TPDOdetectCOS = od.TPDODetectCos.ToString().ToLower();
+                    coo.toDCF = od.toDCF.ToString().ToLower();
                     coo.AccessFunctionPreCode = od.AccessFunctionPreCode;
                     coo.AccessFunctionName = od.AccessFunctionName;
-
-                    coo.Description = new Xml2CSharp.Description();
+                    if (coo.Description == null)
+                        coo.Description = new Xml2CSharp.Description();
+                    coo.Description.Lang = "en";
                     coo.Description.Text = od.Description;
 
                     //if (od.objecttype == ObjectType.ARRAY || od.objecttype == ObjectType.REC)
@@ -84,16 +90,21 @@ namespace libEDSsharp
                             Xml2CSharp.CANopenSubObject sub = new Xml2CSharp.CANopenSubObject();
 
                             sub.Name = subod.parameter_name;
-                            sub.ObjectType = subod.objecttype.ToString();
+                            sub.ObjectType = Convert.ToInt32((int)subod.objecttype).ToString(); 
                             sub.AccessType = subod.accesstype.ToString();
                             sub.DataType = string.Format("0x{0:x2}", (int)subod.datatype);
                             sub.DefaultValue = subod.defaultvalue;
                             sub.PDOmapping = subod.PDOtype.ToString();
                             sub.SubIndex = String.Format("{0:x2}", subod.subindex);
                             sub.TPDOdetectCOS = subod.TPDODetectCos.ToString().ToLower();
+                            sub.toDCF = subod.toDCF.ToString().ToLower();
                             coo.CANopenSubObject.Add(sub);
 
                         }
+                    }
+                    if  (od.nosubindexes != coo.CANopenSubObject.Count)
+                    {
+                        Warnings.warning_list.Add(String.Format("OD \"{0}\" has different SubObjects {1}<->{2}", coo.Index, od.nosubindexes, coo.CANopenSubObject.Count));
                     }
 
                     if (od.objecttype == ObjectType.ARRAY && od.datatype == DataType.UNKNOWN)
@@ -221,14 +232,15 @@ namespace libEDSsharp
 
             dev.Other.File = new File();
 
-            dev.Other.File.FileName = System.IO.Path.GetFileName(eds.xmlfilename); 
-            
-            dev.Other.File.FileCreationDate = eds.fi.CreationDateTime.ToString("MM-dd-yyyy");
-            dev.Other.File.FileCreationTime = eds.fi.CreationDateTime.ToString("h:mmtt");
+            dev.Other.File.FileName = System.IO.Path.GetFileName(eds.xmlfilename);
+
+            CultureInfo ci = new CultureInfo("en-US");
+            dev.Other.File.FileCreationDate = eds.fi.CreationDateTime.ToString("MM-dd-yyyy", ci);
+            dev.Other.File.FileCreationTime = eds.fi.CreationDateTime.ToString("h:mmtt", ci);
             dev.Other.File.FileCreator = eds.fi.CreatedBy;
 
-            dev.Other.File.FileModificationDate = eds.fi.ModificationDateTime.ToString("MM-dd-yyyy");
-            dev.Other.File.FileModificationTime = eds.fi.ModificationDateTime.ToString("h:mmtt");
+            dev.Other.File.FileModificationDate = eds.fi.ModificationDateTime.ToString("MM-dd-yyyy", ci);
+            dev.Other.File.FileModificationTime = eds.fi.ModificationDateTime.ToString("h:mmtt", ci);
             dev.Other.File.FileModifedBy = eds.fi.ModifiedBy;
 
             dev.Other.File.FileVersion = eds.fi.FileVersion.ToString();
@@ -324,6 +336,7 @@ namespace libEDSsharp
                     entry.PDOtype = PDOMappingType.no;
 
                 entry.TPDODetectCos = coo.TPDOdetectCOS == "true";
+                entry.toDCF = coo.toDCF == "true";
                 entry.AccessFunctionName = coo.AccessFunctionName;
                 entry.AccessFunctionPreCode = coo.AccessFunctionPreCode;
                 entry.Disabled = coo.Disabled == "true";
@@ -344,7 +357,7 @@ namespace libEDSsharp
 
                 if (entry.index == 0x1000 || entry.index == 0x1001 || entry.index == 0x1018)
                 {
-                    eds.md.objectlist.Add(eds.md.objectlist.Count + 1, entry.index);
+                    eds.mandortyObj.objectlist.Add(eds.mandortyObj.objectlist.Count + 1, entry.index);
                 }
                 else
                 if (entry.index >= 0x2000 && entry.index < 0x6000)
@@ -401,11 +414,33 @@ namespace libEDSsharp
                             subentry.TPDODetectCos = coo.TPDOdetectCOS == "true";
                     }
 
+                    if (coosub.toDCF != null)
+                    {
+                        subentry.toDCF = coosub.toDCF == "true";
+                    }
+                    else
+                    {
+                        if (coo.toDCF != null)
+                            subentry.toDCF = coo.toDCF == "true";
+                    }
 
                     entry.subobjects.Add(subentry.subindex, subentry);
 
                 }
+
+                if (coo.CANopenSubObject.Count > 0)
+                {
+
+                        ODentry val = entry.subobjects[0];
+                        if ((entry.subobjects.Count - 1) != (Convert.ToInt32(val.defaultvalue)))
+                        {
+                            Warnings.warning_list.Add(String.Format("OD \"0x{0,4:X}\"-{4}- has different SubObjects XML {1}<->{2} <-> to maxSubIndex {3}", entry.index, coo.CANopenSubObject.Count, entry.subobjects.Count, val.defaultvalue, entry.Label));
+                        }
+                    
+                   
+                }
             }
+
 
             eds.du.Dummy0001 = dev.Other.DummyUsage.Dummy[0].Entry == "Dummy0001=1";
             eds.du.Dummy0002 = dev.Other.DummyUsage.Dummy[1].Entry == "Dummy0002=1";
@@ -511,20 +546,36 @@ namespace libEDSsharp
                 eds.fi.CreationTime = eds.fi.CreationDateTime.ToString("h:mmtt");
 
             }
-            catch (Exception e) { }
+            catch (Exception e) {
+                Warnings.warning_list.Add(String.Format("Unable to parse Date & Time\"{0}\" {1}", eds.fi.CreationDateTime, e.ToString()));
+                Warnings.warning_list.Add(String.Format("Try other Format"));
+                eds.fi.CreationDate = eds.fi.CreationDateTime.ToString("yyyy-MM-dd");
+                eds.fi.CreationTime = eds.fi.CreationDateTime.ToString("HH:mm:ss");
+
+            }
 
             eds.fi.CreatedBy = dev.Other.File.FileCreator;
             eds.fi.exportFolder = dev.Other.File.ExportFolder;
 
             dtcombined = string.Format("{0} {1}", dev.Other.File.FileModificationTime, dev.Other.File.FileModificationDate);
-            try
+            if (dtcombined.Length > 2)
             {
-                eds.fi.ModificationDateTime = DateTime.ParseExact(dtcombined, "h:mmtt MM-dd-yyyy", CultureInfo.InvariantCulture);
-                eds.fi.ModificationDate = eds.fi.ModificationDateTime.ToString("MM-dd-yyyy");
-                eds.fi.ModificationTime = eds.fi.ModificationDateTime.ToString("h:mmtt");
+                try
+                {
+                    eds.fi.ModificationDateTime = DateTime.ParseExact(dtcombined, "h:mmtt MM-dd-yyyy", CultureInfo.InvariantCulture);
+                    eds.fi.ModificationDate = eds.fi.ModificationDateTime.ToString("MM-dd-yyyy");
+                    eds.fi.ModificationTime = eds.fi.ModificationDateTime.ToString("h:mmtt");
+                }
+                catch (Exception e)
+                {
+                    Warnings.warning_list.Add(String.Format("Unable to parse Date & Time\"{0}\" {1}", eds.fi.ModificationDateTime, e.ToString()));
+                    if (eds.fi.ModificationDateTime != null)
+                    {
+                        eds.fi.ModificationDate = eds.fi.ModificationDateTime.ToString("yyyy-MM-dd");
+                        eds.fi.ModificationTime = eds.fi.ModificationDateTime.ToString("hh:mm:ss");
+                    }
+                }
             }
-            catch (Exception e) { }
-
 
 
 

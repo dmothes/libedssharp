@@ -91,7 +91,7 @@ CompactSubObj=9
             if (sub.accesstype != AccessType.ro)
                 throw (new Exception("parseEDSentry() CompactSubObj incorrect generation"));
 
-            UInt16 defaultvalue = EDSsharp.ConvertToByte(sub.defaultvalue);
+            UInt16 defaultvalue = ConvertValue.ConvertToByte(sub.defaultvalue);
 
             if (defaultvalue != 9)
                 throw (new Exception("parseEDSentry() CompactSubObj incorrect generation"));

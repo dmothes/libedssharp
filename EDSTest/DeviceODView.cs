@@ -124,15 +124,22 @@ namespace ODEditor
 
                 selectedobject.defaultvalue = textBox_defaultvalue.Text;
                 selectedobject.TPDODetectCos = checkBox_COS.Checked;
+                selectedobject.toDCF = checkBox_toDcf.Checked;            
                 selectedobject.HighLimit = textBox_highvalue.Text;
                 selectedobject.LowLimit = textBox_lowvalue.Text;
-                selectedobject.actualvalue = textBox_actualvalue.Text;
-               
 
+                selectedobject.actualvalue = textBox_actualvalue.Text;
+                if (selectedobject.objecttype == ObjectType.ARRAY)
+                {
+                    foreach (KeyValuePair<ushort, ODentry> kvp2 in selectedobject.subobjects)
+                    {
+                        kvp2.Value.toDCF = selectedobject.toDCF;
+                    }
+                }
                 DataType dt = (DataType)Enum.Parse(typeof(DataType), comboBox_datatype.SelectedItem.ToString());
                 selectedobject.datatype = dt;
 
-
+                //if (comboBox_accesstype.SelectedItem.ToString() == "0x1003 rw/ro")
                 switch(comboBox_accesstype.SelectedItem.ToString())
                 {
                     case "0x1003 rw/ro":
@@ -172,8 +179,11 @@ namespace ODEditor
                         break;
 
                 }
-                
-         
+//                else
+//                {
+//                    EDSsharp.AccessType at = (EDSsharp.AccessType)Enum.Parse(typeof(EDSsharp.AccessType), comboBox_accesstype.SelectedItem.ToString());
+//                    selectedobject.accesstype = at;
+//                }
 
                 selectedobject.PDOtype = (PDOMappingType)Enum.Parse(typeof(PDOMappingType), comboBox_pdomap.SelectedItem.ToString());
 
@@ -312,6 +322,9 @@ namespace ODEditor
             comboBox_pdomap.SelectedItem = od.PDOtype.ToString();
 
             checkBox_COS.Checked = od.TPDODetectCos;
+            checkBox_toDcf.CheckState = CheckState.Unchecked;
+            checkBox_toDcf.ThreeState = false;
+            checkBox_toDcf.Checked = od.toDCF;
           
             checkBox_enabled.Checked = !od.Disabled;
 
@@ -338,6 +351,7 @@ namespace ODEditor
             textBox_lowvalue.Text = od.LowLimit;
 
             checkBox_COS.Enabled = true;
+            checkBox_toDcf.Enabled = true;
             checkBox_enabled.Enabled = true;
 
             if (od.parent == null)
@@ -348,6 +362,28 @@ namespace ODEditor
                     comboBox_accesstype.Enabled = false;
                     comboBox_pdomap.Enabled = false;
                     checkBox_COS.Enabled = false;
+                    //checkBox_toDcf.Enabled = false;
+                    if(od.subobjects.Count > 0)
+                    {
+                        int countSubObjectsToDCF = 0;
+                        foreach (KeyValuePair<UInt16, ODentry> kvp2 in od.subobjects)
+                        {                            
+                            if ((kvp2.Value).toDCF)
+                            {
+                                countSubObjectsToDCF++;
+                            }
+                        }
+                        if (countSubObjectsToDCF > 0)
+                        {                            
+                            if (countSubObjectsToDCF != (od.subobjects.Count - 1))
+                            {
+                                
+                                checkBox_toDcf.ThreeState = true;
+                                checkBox_toDcf.CheckState = CheckState.Indeterminate;
+                            }
+                            checkBox_toDcf.Checked = true;
+                        }
+                    }
                     comboBox_datatype.Enabled = false;
                     textBox_defaultvalue.Enabled = false;
                     textBox_actualvalue.Enabled = false;
@@ -368,18 +404,20 @@ namespace ODEditor
             checkBox_enabled.Checked = false;
             comboBox_memory.Enabled = false;
             checkBox_COS.Enabled = false;
+            checkBox_toDcf.Enabled = false;
             checkBox_enabled.Enabled = false;
-          
+            transPanel1.Visible = false;
+
             checkBox_enabled.Checked = !od.parent.Disabled;
 
             if (od.parent.objecttype == ObjectType.ARRAY && od.subindex != 0)
             {
                 textBox_defaultvalue.Enabled = true;
                 checkBox_COS.Checked = od.parent.TPDODetectCos;
+                checkBox_toDcf.Checked = od.parent.toDCF;
+                transPanel1.Visible = true; 
 
-            }
-
-
+            }else
             if (od.parent.objecttype == ObjectType.REC && od.subindex != 0)
             {
                 textBox_defaultvalue.Enabled = true;
@@ -387,7 +425,12 @@ namespace ODEditor
                 comboBox_pdomap.Enabled = true;
                 comboBox_accesstype.Enabled = true;
                 checkBox_COS.Enabled = true;
-
+                checkBox_toDcf.Enabled = true;
+            }
+            else
+            if (od.parent == null && od.objecttype == ObjectType.REC)
+            {
+                transPanel1.Visible = true;
             }
 
             if (od.parent.objecttype == ObjectType.REC &&
@@ -1154,7 +1197,7 @@ namespace ODEditor
 
             if (button_save_changes.BackColor == Color.Red)
             {
-                if (button_save_changes.BackColor == Color.Red)
+                if (button_save_changes.BackColor == Color.Red && lastselectedobject != null)
                 {
                     if (MessageBox.Show(String.Format("Unsaved changes on Index 0x{0:x4}/{1:x2}\nDo you wish to change objects and loose your changes", lastselectedobject.index, lastselectedobject.subindex), "Unsaved changes",MessageBoxButtons.YesNo) == DialogResult.No)
                     {
