@@ -1079,6 +1079,39 @@ namespace libEDSsharp
             return ret;
         }
 
+        public bool updateActualValue(UInt32 valueToSet)
+        {
+
+            switch(datatype)
+            {
+                case DataType.BOOLEAN:
+                    actualvalue = ((byte)(valueToSet & 0x00000001)).ToString();
+                    break;
+                case DataType.UNSIGNED8:
+                    actualvalue = ((byte)(valueToSet)).ToString();
+                    break;
+                case DataType.INTEGER8:
+                    actualvalue = ((sbyte)(valueToSet)).ToString();
+                    break;
+                case DataType.UNSIGNED16:
+                    actualvalue = ((UInt16)(valueToSet)).ToString();
+                    break;
+                case DataType.INTEGER16:
+                    actualvalue = ((Int16)(valueToSet)).ToString();
+                    break;
+                case DataType.UNSIGNED32:
+                default:
+                    actualvalue = ((UInt32)(valueToSet)).ToString();
+                    break;
+                case DataType.INTEGER32:
+                    actualvalue = ((Int32)(valueToSet)).ToString();
+                    break;
+            }
+
+            return false;
+
+        }
+
         /// <summary>
         /// Write out this Object dictionary entry to an EDS/DCF file using correct formatting
         /// </summary>
@@ -1787,9 +1820,6 @@ namespace libEDSsharp
                     {
                         if (!kvp.Value.ContainsKey("SubNumber"))
                             throw new ParameterException("Missing SubNumber on Array for" + section);
-
-
-
                     }
                 }
 
@@ -1801,6 +1831,11 @@ namespace libEDSsharp
                     if (kvp.Value.ContainsKey("DefaultValue"))
                         od.defaultvalue = kvp.Value["DefaultValue"];
 
+                }
+
+                if (dcffilename != null)
+                {
+                    od.toDCF = true;
                 }
 
                 //Only add top level to this list
@@ -2115,8 +2150,7 @@ namespace libEDSsharp
             //regenerate the object lists
             mandortyObj.objectlist.Clear();
             mo.objectlist.Clear();
-            oo.objectlist.Clear();
-            int countSubObjectsToDCF = 0;
+            oo.objectlist.Clear();            
             foreach (KeyValuePair<UInt16, ODentry> kvp in ods)
             {
                 ODentry entry = kvp.Value;
@@ -2133,18 +2167,8 @@ namespace libEDSsharp
                 }
                 else
                 {
-                    //count Subobjects if there is an REC TYPE
-                    countSubObjectsToDCF = 0;
-                    foreach (KeyValuePair<UInt16, ODentry> kvp2 in entry.subobjects)
-                    {
-                        ODentry od2 = kvp2.Value;
-                        if (od2.toDCF)
-                        {
-                            countSubObjectsToDCF++;
-                        }
-                    }
                     //if toDCF then skip all other not to DCF
-                    if (ft == InfoSection.filetype.File_DCF && !entry.toDCF && (countSubObjectsToDCF == 0))
+                    if (ft == InfoSection.filetype.File_DCF && !entry.toDCF)
                         continue;
 
                     if (entry.index >= 0x2000 && entry.index < 0x6000)
@@ -2170,57 +2194,7 @@ namespace libEDSsharp
             writer.Flush();
             this.writeOD(writer, ft, ods, mo);
             writer.Flush();
-#if false
-            foreach (KeyValuePair<UInt16, ODentry> kvp in ods)
-            {
-                ODentry od = kvp.Value;
-                if (md.objectlist.ContainsValue(od.index))
-                {
-                    if (ft == InfoSection.filetype.File_DCF && !od.toDCF)
-                        continue;
 
-                    od.write(writer,ft);
-                    foreach (KeyValuePair<UInt16, ODentry> kvp2 in od.subobjects)
-                    {
-                        ODentry od2 = kvp2.Value;
-
-                        if (ft == InfoSection.filetype.File_DCF && !od2.toDCF)
-                            continue;
-                        od2.write(writer,ft);
-                    }                    
-                }
-            }
-
-
-            foreach (KeyValuePair<UInt16, ODentry> kvp in ods)
-            {
-                ODentry od = kvp.Value;
-                if (oo.objectlist.ContainsValue(od.index))
-                {
-                    od.write(writer,ft);
-                    foreach (KeyValuePair<UInt16, ODentry> kvp2 in od.subobjects)
-                    {
-                        ODentry od2 = kvp2.Value;
-                        od2.write(writer,ft);
-                    }                    
-                }
-            }
-
-
-            foreach (KeyValuePair<UInt16, ODentry> kvp in ods)
-            {
-                ODentry od = kvp.Value;
-                if (mo.objectlist.ContainsValue(od.index))
-                {
-                    od.write(writer,ft);
-                    foreach (KeyValuePair<UInt16, ODentry> kvp2 in od.subobjects)
-                    {
-                        ODentry od2 = kvp2.Value;
-                        od2.write(writer,ft);
-                    }                    
-                }
-            }
-#endif
             //modules
 
             if (sm.NrOfEntries > 0)
@@ -2274,8 +2248,8 @@ namespace libEDSsharp
 
         private void writeOD(StreamWriter writer, InfoSection.filetype ft, SortedDictionary<UInt16, ODentry> odToWrite, SupportedObjects supportedObjectList)
         {
-            int countSubObjectsToDCF = 0;
-            string countOriginalSubObjects;
+            //int countSubObjectsToDCF = 0;
+            //string countOriginalSubObjects;
             bool indexSubObjectToDCF = false;
 
             foreach (KeyValuePair<UInt16, ODentry> kvp in odToWrite)
@@ -2283,6 +2257,7 @@ namespace libEDSsharp
                 ODentry od = kvp.Value;
                 if (supportedObjectList.objectlist.ContainsValue(od.index))
                 {
+#if false
                     //count Subobjects if there is an REC TYPE
                     countSubObjectsToDCF = 0;
                     foreach (KeyValuePair<UInt16, ODentry> kvp2 in od.subobjects)
@@ -2300,24 +2275,19 @@ namespace libEDSsharp
                     {
                         continue;
                     }
-    
+#endif                
+                    //write main object  
                     od.write(writer, ft);
                     if (od.subobjects.Count > 0)
                     {
-                        //countOriginalSubObjects = od.subobjects[0].defaultvalue;
-                        //od.subobjects[0].defaultvalue = Convert.ToString(countSubObjectsToDCF);
-                        indexSubObjectToDCF = od.subobjects[0].toDCF;
-                        od.subobjects[0].toDCF = true;
                         foreach (KeyValuePair<UInt16, ODentry> kvp2 in od.subobjects)
                         {
-                            ODentry od2 = kvp2.Value;
-
-                            if ((ft == InfoSection.filetype.File_DCF && !od2.toDCF && !od.toDCF))
+                            ODentry odSub = kvp2.Value;
+                            //only write out subobject 0 and all subobject wich should be in dcf
+                            if (((ft == InfoSection.filetype.File_DCF) && (!odSub.toDCF) && (kvp2.Key > 0)))
                                 continue;
-                            od2.write(writer, ft);
+                            odSub.write(writer, ft);
                         }
-                        //od.subobjects[0].defaultvalue = countOriginalSubObjects;
-                        od.subobjects[0].toDCF = indexSubObjectToDCF;
                     }
                 }
             }
