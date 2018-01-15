@@ -127,15 +127,7 @@ namespace ODEditor
                 selectedobject.toDCF = checkBox_toDcf.Checked;            
                 selectedobject.HighLimit = textBox_highvalue.Text;
                 selectedobject.LowLimit = textBox_lowvalue.Text;
-
                 selectedobject.actualvalue = textBox_actualvalue.Text;
-                if (selectedobject.objecttype == ObjectType.ARRAY)
-                {
-                    foreach (KeyValuePair<ushort, ODentry> kvp2 in selectedobject.subobjects)
-                    {
-                        kvp2.Value.toDCF = selectedobject.toDCF;
-                    }
-                }
                 DataType dt = (DataType)Enum.Parse(typeof(DataType), comboBox_datatype.SelectedItem.ToString());
                 selectedobject.datatype = dt;
 
@@ -199,11 +191,11 @@ namespace ODEditor
                 // We only really need to do this for PDOMapping to fix bug #13 see report
                 // on git hub for discussion why other parameters are not propogated here
                 // tl;dr; Limitations of CanOpenNode object dictionary perms for sub array objects
-
                 foreach (KeyValuePair<UInt16,ODentry>kvp in selectedobject.subobjects)
                 {
                     ODentry subod = kvp.Value;
-
+                    //added propagate toDCf to subobjects
+                    subod.toDCF = selectedobject.toDCF;
                     subod.PDOtype = selectedobject.PDOtype;
                     switch(comboBox_accesstype.SelectedItem.ToString())
                     {
@@ -227,15 +219,29 @@ namespace ODEditor
             //If we edit a parent REC object we also need to change the storage location of subobjects
             //this does occur implicity anyway and it also occurs during load of file but the GUI was displaying
             //incorrect data in the shaded combobox item for storage location
+            int countSubODtoDCF = 0;
             if (selectedobject.parent == null && selectedobject.objecttype == ObjectType.REC)
             {
                 foreach (KeyValuePair<UInt16, ODentry> kvp in selectedobject.subobjects)
                 {
                     ODentry subod = kvp.Value;
                     subod.StorageLocation = selectedobject.StorageLocation;
+                    //add dmothes
+                    //if we have REC with some SUBs to DCF then we need to set the parent toDCF = true
+                    if (subod.toDCF)
+                    {
+                        countSubODtoDCF++;
+                    }
+                }
+                if (countSubODtoDCF > 0)
+                {
+                    selectedobject.toDCF = true;
+                }
+                else
+                {
+                    selectedobject.toDCF = false;
                 }
             }
-
 
             updateselectedindexdisplay(selectedobject.index, currentmodule);
             validateanddisplaydata();
