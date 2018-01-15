@@ -196,19 +196,19 @@ namespace libEDSsharp
                                 break;
 
                             case "UInt32":
-                                var = Convert.ToUInt32(section[name], EDSsharp.getbase(section[name]));
+                                var = Convert.ToUInt32(section[name], ConvertValue.getbase(section[name]));
                                 break;
 
                             case "Int16":
-                                var = Convert.ToInt16(section[name], EDSsharp.getbase(section[name]));
+                                var = Convert.ToInt16(section[name], ConvertValue.getbase(section[name]));
                                 break;
 
                             case "UInt16":
-                                var = Convert.ToUInt16(section[name], EDSsharp.getbase(section[name]));
+                                var = Convert.ToUInt16(section[name], ConvertValue.getbase(section[name]));
                                 break;
 
                             case "Byte":
-                                var = Convert.ToByte(section[name], EDSsharp.getbase(section[name]));
+                                var = Convert.ToByte(section[name], ConvertValue.getbase(section[name]));
                                 break;
 
                             case "Boolean":
@@ -368,8 +368,8 @@ namespace libEDSsharp
                 if (kvp.Key.ToLower() == "nrofentries")
                     continue;
 
-                int count = Convert.ToInt16(kvp.Key, EDSsharp.getbase(kvp.Key));
-                int target = Convert.ToInt16(kvp.Value, EDSsharp.getbase(kvp.Value));
+                int count = Convert.ToInt16(kvp.Key, ConvertValue.getbase(kvp.Key));
+                int target = Convert.ToInt16(kvp.Value, ConvertValue.getbase(kvp.Value));
                 objectlist.Add(count, target);
             }
         }
@@ -1158,6 +1158,7 @@ namespace libEDSsharp
                 if (ft == InfoSection.filetype.File_DCF)
                 {
                     writer.WriteLine(string.Format("ParameterValue={0}", formatoctetstring(actualvalue)));
+                    }
                 }
 
                 writer.WriteLine(string.Format("PDOMapping={0}", PDOMapping==true?1:0));
@@ -1263,7 +1264,7 @@ namespace libEDSsharp
                     return s;
             }
 
-            return null;
+            return this;
         }
 
         public string getsubobjectdefaultvalue(int no)
@@ -1293,7 +1294,7 @@ namespace libEDSsharp
             if (objecttype == ObjectType.ARRAY || objecttype == ObjectType.REC)
                 if (containssubindex(0))
                 {
-                    return EDSsharp.ConvertToByte(getsubobjectdefaultvalue(0));
+                    return ConvertValue.ConvertToByte(getsubobjectdefaultvalue(0));
                 }
 
             return 0;
@@ -2267,43 +2268,7 @@ namespace libEDSsharp
 
         }
 
-
-        static public byte ConvertToByte(string defaultvalue)
-        {
-            if (defaultvalue == null || defaultvalue == "")
-                return 0;
-
-            return (Convert.ToByte(defaultvalue, getbase(defaultvalue)));
-        }
-
-        static public UInt16 ConvertToUInt16(byte [] bytes)
-        {
-
-            UInt16 value = 0;
-
-            value = (UInt16) ((bytes[0] << 8) | bytes[1]);
-
-            return value;
-
-        }
-
-        static public UInt16 ConvertToUInt16(string defaultvalue)
-        {
-            if (defaultvalue == null || defaultvalue == "" )
-                return 0;
-
-            return (Convert.ToUInt16(defaultvalue, getbase(defaultvalue)));
-        }
-
-        static public UInt32 ConvertToUInt32(string defaultvalue)
-        {
-            if (defaultvalue == null || defaultvalue == "" )
-                return 0;
-
-            return (Convert.ToUInt32(defaultvalue, getbase(defaultvalue)));
-        }
-
-        static public int getbase(string defaultvalue)
+        public int getbase(string defaultvalue)
         {
 
             if (defaultvalue == null || defaultvalue == "")
@@ -2661,7 +2626,6 @@ mapped object  (subindex 1...8)
         public static class Warnings
         {
             public static List<string> warning_list = new List<string>();
-
         }
 
  }

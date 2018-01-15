@@ -82,16 +82,16 @@ namespace libEDSsharp
                                 TXCOB = eds.GetNodeID(kvp.Value.getsubobject(1).defaultvalue, out nodeidpresent);
 
                             if (kvp.Value.containssubindex(2))
-                                type = EDSsharp.ConvertToByte(kvp.Value.getsubobject(2).defaultvalue);
+                                type = ConvertValue.ConvertToByte(kvp.Value.getsubobject(2).defaultvalue);
 
                             if (kvp.Value.containssubindex(3))
-                                inhibit = EDSsharp.ConvertToUInt16(kvp.Value.getsubobject(3).defaultvalue);
+                                inhibit = ConvertValue.ConvertToUInt16(kvp.Value.getsubobject(3).defaultvalue);
 
                             if (kvp.Value.containssubindex(5))
-                                timer = EDSsharp.ConvertToUInt16(kvp.Value.getsubobject(5).defaultvalue);
+                                timer = ConvertValue.ConvertToUInt16(kvp.Value.getsubobject(5).defaultvalue);
 
                             if (kvp.Value.containssubindex(6))
-                                syncstart = EDSsharp.ConvertToByte(kvp.Value.getsubobject(6).defaultvalue);
+                                syncstart = ConvertValue.ConvertToByte(kvp.Value.getsubobject(6).defaultvalue);
 
 
                             byte totalsize = 0;
@@ -100,7 +100,7 @@ namespace libEDSsharp
                                 if (!map.containssubindex(sub))
                                     continue;
 
-                                UInt32 mapping = EDSsharp.ConvertToUInt32(map.getsubobject(sub).defaultvalue);
+                                UInt32 mapping = ConvertValue.ConvertToUInt32(map.getsubobject(sub).defaultvalue);
                                 if (mapping == 0)
                                     continue;
 
@@ -139,7 +139,7 @@ namespace libEDSsharp
                                 if (map.getsubobjectdefaultvalue(sub) == "")
                                     continue;
 
-                                UInt32 mapping = EDSsharp.ConvertToUInt32(map.getsubobjectdefaultvalue(sub));
+                                UInt32 mapping = ConvertValue.ConvertToUInt32(map.getsubobjectdefaultvalue(sub));
                                 if (mapping == 0)
                                     continue;
 
@@ -212,7 +212,7 @@ namespace libEDSsharp
 
                                                         for (byte sub2 = 1; sub2 <= map2.getmaxsubindex(); sub2++)
                                                         {
-                                                            mapping2 = EDSsharp.ConvertToUInt32(map2.getsubobjectdefaultvalue(sub2));
+                                                            mapping2 = ConvertValue.ConvertToUInt32(map2.getsubobjectdefaultvalue(sub2));
                                                             size2 = (byte)(mapping2);
                                                             totalsize2 += size2;
                                                         }
@@ -223,7 +223,7 @@ namespace libEDSsharp
 
                                                         for (byte sub2 = 1; sub2 <= map2.getmaxsubindex(); sub2++)
                                                         {
-                                                            mapping2 = EDSsharp.ConvertToUInt32(map2.getsubobjectdefaultvalue(sub2));
+                                                            mapping2 = ConvertValue.ConvertToUInt32(map2.getsubobjectdefaultvalue(sub2));
                                                             index2 = (UInt16)(mapping2 >> 16);
                                                             subindex2 = (UInt16)(0x00FF & (mapping2 >> 8));
                                                             size2 = (byte)mapping2;

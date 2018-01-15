@@ -43,6 +43,7 @@
     <Compile Include="CanOpenNodeExporter.cs" />
     <Compile Include="CanOpenXDD.cs" />
     <Compile Include="CanOpenXML.cs" />
+    <Compile Include="ConvertValue.cs" />
     <Compile Include="DocumentationGen.cs" />
     <Compile Include="eds.cs" />
     <Compile Include="NetworkPDOreport.cs" />

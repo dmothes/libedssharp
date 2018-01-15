@@ -735,7 +735,7 @@ namespace libEDSsharp
 
                     if (obj3.index != null)
                     {
-                        index = (UInt16)EDSsharp.ConvertToUInt16(obj3.index);
+                        index = (UInt16)ConvertValue.ConvertToUInt16(obj3.index);
                         entry.index = index;
                     }
                     else
@@ -747,7 +747,7 @@ namespace libEDSsharp
                     entry.objecttype = (ObjectType)obj3.objectType;
 
                     if (obj3.dataType != null)
-                        entry.datatype = (DataType)EDSsharp.ConvertToUInt16(obj3.dataType);
+                        entry.datatype = (DataType)ConvertValue.ConvertToUInt16(obj3.dataType);
 
                     if (obj3.defaultValue != null)
                         entry.defaultvalue = obj3.defaultValue;
@@ -786,7 +786,7 @@ namespace libEDSsharp
 
                             if (subobj.dataType != null)
                             {
-                                datatype = (DataType)EDSsharp.ConvertToUInt16(subobj.dataType);
+                                datatype = (DataType)ConvertValue.ConvertToUInt16(subobj.dataType);
                             }
                             else
                             {
@@ -856,9 +856,9 @@ namespace libEDSsharp
                 if (obj.DeviceIdentity != null)
                 {
                     eds.di.ProductName = obj.DeviceIdentity.productName.Value;
-                    eds.di.ProductNumber = EDSsharp.ConvertToUInt32(obj.DeviceIdentity.productID.Value);
+                    eds.di.ProductNumber = ConvertValue.ConvertToUInt32(obj.DeviceIdentity.productID.Value);
                     eds.di.VendorName = obj.DeviceIdentity.vendorName.Value;
-                    eds.di.VendorNumber = EDSsharp.ConvertToUInt32(obj.DeviceIdentity.vendorID.Value);
+                    eds.di.VendorNumber = ConvertValue.ConvertToUInt32(obj.DeviceIdentity.vendorID.Value);
 
                     foreach (object o in obj.DeviceIdentity.productText.Items)
                     {
