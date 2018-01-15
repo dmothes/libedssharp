@@ -1545,10 +1545,19 @@ namespace libEDSsharp
                 {
                     if (sectionname != null)
                     {
-                        if (!eds.ContainsKey(sectionname))
+                        if (eds.ContainsKey(sectionname))
                         {
-                            //could be more generic
-                            eds[sectionname].Add("StorageLocation", value);
+                            string pat = @"[A-Z]+$";
+                            Regex r = new Regex(pat, RegexOptions.IgnoreCase);
+                            Match m = r.Match(linex);
+                            if (m.Success)
+                            {
+                                //could be more generic                                
+                                eds[sectionname].Add("StorageLocation", m.Value.ToString());
+                            }else
+                            {
+                                eds[sectionname].Add("StorageLocation", "ROM");
+                            }
                         }
                     }
 
