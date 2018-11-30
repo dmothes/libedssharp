@@ -148,7 +148,8 @@ namespace ODEditor
 
                 eds.fi.EDSVersion = textBox_fileversion.Text;
 
-                eds.fi.ModificationDateTime = DateTime.Parse(textBox_modified_datetime.Text);
+                eds.fi.ModificationDateTime = DateTime.Now;
+                textBox_modified_datetime.Text = DateTime.Now.ToString();
 
                 eds.fi.ModifiedBy = textBox_modifiedby.Text;
 
@@ -206,7 +207,7 @@ namespace ODEditor
                 eds.dc.CANopenManager = checkBox_canopenmanager.Checked;
                 eds.dc.LSS_SerialNumber = Convert.ToUInt32(textBox_lssserial.Text);
 
-                eds.dirty = true;
+                eds.Dirty = true;
             }
             catch (Exception ex)
             {

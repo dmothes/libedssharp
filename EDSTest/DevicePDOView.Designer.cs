@@ -52,6 +52,7 @@
             this.label3 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.listView_TXCOBmap = new CustomListView.ListViewEx();
+            this.columnHeader11 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader10 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -63,7 +64,6 @@
             this.columnHeader8 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader9 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.button_addPDO = new System.Windows.Forms.Button();
-            this.columnHeader11 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -143,7 +143,7 @@
             this.groupBox1.Size = new System.Drawing.Size(295, 199);
             this.groupBox1.TabIndex = 12;
             this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "Commuincation parameters";
+            this.groupBox1.Text = "Communication parameters";
             // 
             // checkBox_invalidpdo
             // 
@@ -154,7 +154,7 @@
             this.checkBox_invalidpdo.TabIndex = 16;
             this.checkBox_invalidpdo.Text = "Invalid";
             this.checkBox_invalidpdo.UseVisualStyleBackColor = true;
-            this.checkBox_invalidpdo.CheckedChanged += new System.EventHandler(this.checkBox_invalidpdo_CheckedChanged);
+            this.checkBox_invalidpdo.CheckedChanged += new System.EventHandler(this.CheckBox_invalidpdo_CheckedChanged);
             // 
             // button_savepdochanges
             // 
@@ -166,7 +166,7 @@
             this.button_savepdochanges.TabIndex = 15;
             this.button_savepdochanges.Text = "Save ";
             this.button_savepdochanges.UseVisualStyleBackColor = true;
-            this.button_savepdochanges.Click += new System.EventHandler(this.button_savepdochanges_Click);
+            this.button_savepdochanges.Click += new System.EventHandler(this.Button_savepdochanges_Click);
             // 
             // button_deletePDO
             // 
@@ -178,7 +178,7 @@
             this.button_deletePDO.TabIndex = 14;
             this.button_deletePDO.Text = "Delete PDO";
             this.button_deletePDO.UseVisualStyleBackColor = true;
-            this.button_deletePDO.Click += new System.EventHandler(this.button_deletePDO_Click);
+            this.button_deletePDO.Click += new System.EventHandler(this.Button_deletePDO_Click);
             // 
             // textBox_slot
             // 
@@ -299,7 +299,12 @@
             this.listView_TXCOBmap.TabIndex = 10;
             this.listView_TXCOBmap.UseCompatibleStateImageBehavior = false;
             this.listView_TXCOBmap.View = System.Windows.Forms.View.Details;
-            this.listView_TXCOBmap.MouseClick += new System.Windows.Forms.MouseEventHandler(this.listView_TXCOBmap_MouseClick);
+            this.listView_TXCOBmap.MouseClick += new System.Windows.Forms.MouseEventHandler(this.ListView_TXCOBmap_MouseClick);
+            // 
+            // columnHeader11
+            // 
+            this.columnHeader11.Text = "Num";
+            this.columnHeader11.Width = 38;
             // 
             // columnHeader1
             // 
@@ -350,7 +355,7 @@
             // columnHeader9
             // 
             this.columnHeader9.Text = "Byte7";
-            this.columnHeader9.Width = 100;
+            this.columnHeader9.Width = 105;
             // 
             // button_addPDO
             // 
@@ -362,12 +367,7 @@
             this.button_addPDO.TabIndex = 13;
             this.button_addPDO.Text = "Add new PDO";
             this.button_addPDO.UseVisualStyleBackColor = true;
-            this.button_addPDO.Click += new System.EventHandler(this.button_addPDO_Click);
-            // 
-            // columnHeader11
-            // 
-            this.columnHeader11.Text = "Num";
-            this.columnHeader11.Width = 38;
+            this.button_addPDO.Click += new System.EventHandler(this.Button_addPDO_Click);
             // 
             // DevicePDOView
             // 

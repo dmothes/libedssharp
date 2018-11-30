@@ -108,7 +108,7 @@ namespace ODEditor
             if (selectedobject == null)
                 return;
 
-            eds.dirty = true;
+            eds.Dirty = true;
 
             button_save_changes.BackColor = default(Color);
 
@@ -137,32 +137,43 @@ namespace ODEditor
                 {
                     case "0x1003 rw/ro":
                         selectedobject.accesstype = EDSsharp.AccessType.rw;
-                        for (byte p = 0; p < selectedobject.subobjects.Count; p++)
+
+                        foreach(KeyValuePair <UInt16,ODentry> kvp in selectedobject.subobjects)
                         {
-                            if (selectedobject.subobjects[p].subindex == 0)
-                                selectedobject.subobjects[p].accesstype = EDSsharp.AccessType.rw;
+                            ODentry od = kvp.Value;
+                            UInt16 subindex = kvp.Key;
+
+                            if (subindex == 0)
+                                od.accesstype = EDSsharp.AccessType.rw;
                             else
-                                selectedobject.subobjects[p].accesstype = EDSsharp.AccessType.ro;
+                                od.accesstype = EDSsharp.AccessType.ro;
+
                         }
+
                         break;
 
                     case "0x1010 const/rw":
-                        for (byte p = 0; p < selectedobject.subobjects.Count; p++)
+                        foreach (KeyValuePair<UInt16, ODentry> kvp in selectedobject.subobjects)
                         {
-                            if (selectedobject.subobjects[p].subindex == 0)
-                                selectedobject.subobjects[p].accesstype = EDSsharp.AccessType.@const;
+                            ODentry od = kvp.Value;
+                            UInt16 subindex = kvp.Key;
+
+                            if (subindex == 0)
+                                od.accesstype = EDSsharp.AccessType.@const;
                             else
-                                selectedobject.subobjects[p].accesstype = EDSsharp.AccessType.rw;
+                                od.accesstype = EDSsharp.AccessType.rw;
                         }
                         break;
 
                     case "0x1010 const/ro":
-                        for (byte p = 0; p < selectedobject.subobjects.Count; p++)
+                        foreach (KeyValuePair<UInt16, ODentry> kvp in selectedobject.subobjects)
                         {
-                            if (selectedobject.subobjects[p].subindex == 0)
-                                selectedobject.subobjects[p].accesstype = EDSsharp.AccessType.@const;
+                            ODentry od = kvp.Value;
+                            UInt16 subindex = kvp.Key;
+                            if (subindex == 0)
+                                od.accesstype = EDSsharp.AccessType.@const;
                             else
-                                selectedobject.subobjects[p].accesstype = EDSsharp.AccessType.ro;
+                                od.accesstype = EDSsharp.AccessType.ro;
                         }
                         break;
 
@@ -193,6 +204,7 @@ namespace ODEditor
                 foreach (KeyValuePair<UInt16,ODentry>kvp in selectedobject.subobjects)
                 {
                     ODentry subod = kvp.Value;
+                    UInt16 subindex = kvp.Key;
 
                     subod.PDOtype = selectedobject.PDOtype;
                     switch(comboBox_accesstype.SelectedItem.ToString())
@@ -203,7 +215,7 @@ namespace ODEditor
                             break;
 
                         default:
-                            if (subod.subindex != 0)
+                            if (subindex != 0)
                                 subod.accesstype = selectedobject.accesstype;
                             break;
 
@@ -227,7 +239,7 @@ namespace ODEditor
             }
 
 
-            updateselectedindexdisplay(selectedobject.index, currentmodule);
+            updateselectedindexdisplay(selectedobject.Index, currentmodule);
             validateanddisplaydata();
 
             populateindexlists(); 
@@ -239,7 +251,7 @@ namespace ODEditor
             if (selectedobject == null)
                 return;
 
-            updateselectedindexdisplay(selectedobject.index, currentmodule);
+            updateselectedindexdisplay(selectedobject.Index, currentmodule);
         }
 
         public void validateanddisplaydata()
@@ -259,11 +271,11 @@ namespace ODEditor
 
             if (currentmodule == 0)
             {
-                label_index.Text = string.Format("0x{0:x4}", od.index);
+                label_index.Text = string.Format("0x{0:x4}", od.Index);
             }
             else
             {
-                label_index.Text = string.Format("0x{0:x4} in module {1} -- {2}", od.index,currentmodule,eds.modules[currentmodule].mi.ProductName);
+                label_index.Text = string.Format("0x{0:x4} in module {1} -- {2}", od.Index,currentmodule,eds.modules[currentmodule].mi.ProductName);
             }
 
             textBox_name.Text = od.parameter_name;
@@ -372,15 +384,14 @@ namespace ODEditor
           
             checkBox_enabled.Checked = !od.parent.Disabled;
 
-            if (od.parent.objecttype == ObjectType.ARRAY && od.subindex != 0)
+            if (od.parent.objecttype == ObjectType.ARRAY && od.Subindex != 0)
             {
                 textBox_defaultvalue.Enabled = true;
                 checkBox_COS.Checked = od.parent.TPDODetectCos;
 
             }
 
-
-            if (od.parent.objecttype == ObjectType.REC && od.subindex != 0)
+            if (od.parent.objecttype == ObjectType.REC && od.Subindex != 0)
             {
                 textBox_defaultvalue.Enabled = true;
                 comboBox_datatype.Enabled = true;
@@ -391,8 +402,8 @@ namespace ODEditor
             }
 
             if (od.parent.objecttype == ObjectType.REC &&
-                ((od.parent.index >=0x1600 && od.parent.index <= 0x17ff) || (od.parent.index >= 0x1A00 && od.parent.index <= 0x1Bff)) &&
-                od.subindex == 0)
+                ((od.parent.Index >=0x1600 && od.parent.Index <= 0x17ff) || (od.parent.Index >= 0x1A00 && od.parent.Index <= 0x1Bff)) &&
+                od.Subindex == 0)
             {
                 //We are allowed to edit the no sub objects for the PDO mappings as its a requirment to support dynamic PDOs
 
@@ -481,7 +492,7 @@ namespace ODEditor
                     lvi2.SubItems.Add(subod.objecttype.ToString());
 
 
-                    if (subod.datatype == DataType.UNKNOWN || (od.objecttype == ObjectType.ARRAY && subod.subindex != 0))
+                    if (subod.datatype == DataType.UNKNOWN || (od.objecttype == ObjectType.ARRAY && subindex != 0))
                     {
                         lvi2.SubItems.Add(" -- ");
                     }
@@ -665,7 +676,7 @@ namespace ODEditor
 
                 if (parent.objecttype == ObjectType.ARRAY || parent.objecttype == ObjectType.REC)
                 {
-                    if (od.subindex == 0 || od.parent == null)
+                    if (od.Subindex == 0 || od.parent == null)
                     {
                         contextMenu_array.Items[2].Enabled = false;
                     }
@@ -675,7 +686,7 @@ namespace ODEditor
                     }
 
                     //Only show the special subindex adjust menu for subindex 0 of arrays
-                    if((od.parent!=null) && (parent.objecttype == ObjectType.ARRAY) && (od.subindex==0))
+                    if((od.parent!=null) && (parent.objecttype == ObjectType.ARRAY) && (od.Subindex==0))
                     {
                         contextMenu_array.Items[0].Enabled = true;
                         contextMenu_array.Items[0].Visible = true;
@@ -754,12 +765,12 @@ namespace ODEditor
             {
 
 
-                UInt16 index = kvp.Value.index;
-                ListViewItem lvi = new ListViewItem(string.Format("0x{0:x4}", kvp.Value.index));
+                UInt16 index = kvp.Value.Index;
+                ListViewItem lvi = new ListViewItem(string.Format("0x{0:x4}", kvp.Value.Index));
                 lvi.SubItems.Add(kvp.Value.parameter_name);
                 lvi.Tag = kvp.Value;
                 if (selectedobject != null)
-                    if (index == selectedobject.index)
+                    if (index == selectedobject.Index)
                         lvi.Selected = true;
 
                 if (kvp.Value.Disabled == true)
@@ -788,12 +799,12 @@ namespace ODEditor
                 {
 
                 
-                    UInt16 index = kvp.Value.index;
-                    ListViewItem lvi = new ListViewItem(string.Format("({0}) 0x{1:x4}", m.moduleindex,kvp.Value.index));
+                    UInt16 index = kvp.Value.Index;
+                    ListViewItem lvi = new ListViewItem(string.Format("({0}) 0x{1:x4}", m.moduleindex,kvp.Value.Index));
                     lvi.SubItems.Add(kvp.Value.parameter_name);
                     lvi.Tag = kvp.Value;
                     if (selectedobject != null)
-                        if (index == selectedobject.index)
+                        if (index == selectedobject.Index)
                             lvi.Selected = true;
 
                     lvi.ForeColor = Color.Blue;
@@ -836,12 +847,12 @@ namespace ODEditor
             if (ni.ShowDialog() == DialogResult.OK)
             {
 
-                eds.dirty = true;
+                eds.Dirty = true;
 
                 ODentry od = new ODentry();
 
                 od.objecttype = ni.ot;
-                od.index = ni.index;
+                od.Index = ni.index;
                 od.StorageLocation = "RAM";
                 od.defaultvalue = "";
                 od.accesstype = EDSsharp.AccessType.rw;
@@ -854,13 +865,11 @@ namespace ODEditor
                         ODentry sod = new ODentry();
 
                         sod.objecttype = ObjectType.VAR;
-                        sod.subindex = 0;
-                        sod.index = ni.index;
+                        sod.parent = od;
                         sod.StorageLocation = "RAM";
                         sod.defaultvalue = String.Format("{0}",ni.nosubindexes);
                         sod.accesstype = EDSsharp.AccessType.ro;
                         sod.datatype = DataType.UNSIGNED8;
-                        sod.parent = od;
 
                         sod.parameter_name = "max sub-index";
 
@@ -873,25 +882,23 @@ namespace ODEditor
                         ODentry sod = new ODentry();
 
                         sod.objecttype = ObjectType.VAR;
-                        sod.subindex = (UInt16)(p + 1);
-                        sod.index = ni.index;
+                        sod.parent = od;
                         sod.StorageLocation = "RAM";
                         sod.defaultvalue = "";
                         sod.accesstype = EDSsharp.AccessType.rw;
                         sod.datatype = ni.dt;
-                        sod.parent = od;
 
                         od.subobjects.Add((ushort)(p + 1), sod);
                     }
 
                 }
 
-                eds.ods.Add(od.index, od);
+                eds.ods.Add(od.Index, od);
 
                 //Now switch to it as well Bug #26
 
-                updateselectedindexdisplay(od.index, currentmodule);
-                selectedobject = eds.ods[od.index];
+                updateselectedindexdisplay(od.Index, currentmodule);
+                selectedobject = eds.ods[od.Index];
                 validateanddisplaydata();
 
 
@@ -920,18 +927,18 @@ namespace ODEditor
                 if (eds.ods.ContainsKey(idx))
                 {
                     ODentry pdood = eds.ods[idx];
-                    for(byte subno=1;subno<pdood.nosubindexes;subno++)
+                    for(byte subno=1;subno<pdood.Nosubindexes;subno++)
                     {
                         try
                         {
                             UInt16 odindex = Convert.ToUInt16(pdood.subobjects[subno].defaultvalue.Substring(0, 4), 16);
-                            if(odindex==od.index)
+                            if(odindex==od.Index)
                             {
-                                MessageBox.Show(string.Format("Cannot delete OD entry it is mapped in PDO {0:4x}", pdood.index));
+                                MessageBox.Show(string.Format("Cannot delete OD entry it is mapped in PDO {0:4x}", pdood.Index));
                                 return;
                             }
                         }
-                        catch(Exception ex)
+                        catch(Exception)
                         {
                             //Failed to parse the PDO
                         }
@@ -943,12 +950,12 @@ namespace ODEditor
             }
 
 
-            if (MessageBox.Show(string.Format("Really delete index 0x{0:x4} ?", od.index), "Are you sure?", MessageBoxButtons.YesNo) == DialogResult.Yes)
+            if (MessageBox.Show(string.Format("Really delete index 0x{0:x4} ?", od.Index), "Are you sure?", MessageBoxButtons.YesNo) == DialogResult.Yes)
             {
-                eds.dirty = true;
+                eds.Dirty = true;
                 if (currentmodule == 0)
                 {
-                    eds.ods.Remove(od.index);
+                    eds.ods.Remove(od.Index);
                 }
                 
                 populateindexlists();
@@ -964,7 +971,7 @@ namespace ODEditor
 
             ODentry od = (ODentry)item.Tag;
 
-            eds.dirty = true;
+            eds.Dirty = true;
             od.Disabled = !od.Disabled;
             populateindexlists();
 
@@ -986,9 +993,7 @@ namespace ODEditor
                     newsub.datatype = od.datatype;
                     newsub.accesstype = od.accesstype;
                     newsub.PDOtype = od.PDOtype;
-                    newsub.index = od.index;
                     newsub.objecttype = ObjectType.VAR;
-                    newsub.subindex = (UInt16)od.subobjects.Count;
                     od.subobjects.Add((UInt16)(od.subobjects.Count), newsub);
 
                     UInt16 def = EDSsharp.ConvertToUInt16(od.subobjects[0].defaultvalue);
@@ -1012,9 +1017,7 @@ namespace ODEditor
                         newsub.datatype = ni.dt;
                         newsub.accesstype = od.accesstype;
                         newsub.PDOtype = od.PDOtype;
-                        newsub.index = od.index;
                         newsub.objecttype = ObjectType.VAR;
-                        newsub.subindex = (UInt16)od.subobjects.Count;
                         newsub.parameter_name = ni.name;
 
                         od.subobjects.Add((UInt16)(od.subobjects.Count), newsub);
@@ -1025,8 +1028,8 @@ namespace ODEditor
                     }
                 }
 
-                eds.dirty = true;
-                updateselectedindexdisplay(selectedobject.index, currentmodule);
+                eds.Dirty = true;
+                updateselectedindexdisplay(selectedobject.Index, currentmodule);
                 validateanddisplaydata();
 
             }
@@ -1038,7 +1041,7 @@ namespace ODEditor
             {
                 ODentry od = (ODentry)selecteditemsub.Tag;
 
-                if (od.parent.objecttype == ObjectType.ARRAY)
+                if (od.parent.objecttype == ObjectType.ARRAY || od.parent.objecttype == ObjectType.REC)
                 {
                     UInt16 count = EDSsharp.ConvertToUInt16(od.parent.subobjects[0].defaultvalue);
                     if (count > 0)
@@ -1046,7 +1049,7 @@ namespace ODEditor
                     od.parent.subobjects[0].defaultvalue = count.ToString();
                 }
 
-                bool success = od.parent.subobjects.Remove(od.subindex);
+                bool success = od.parent.subobjects.Remove(od.Subindex);
 
                 UInt16 countx = 0;
 
@@ -1055,15 +1058,14 @@ namespace ODEditor
                 foreach (KeyValuePair<UInt16, ODentry> kvp in od.parent.subobjects)
                 {
                     ODentry sub = kvp.Value;
-                    sub.subindex = countx;
                     newlist.Add(countx, sub);
                     countx++;
                 }
 
                 od.parent.subobjects = newlist;
 
-                eds.dirty = true;
-                updateselectedindexdisplay(selectedobject.index, currentmodule);
+                eds.Dirty = true;
+                updateselectedindexdisplay(selectedobject.Index, currentmodule);
                 validateanddisplaydata();
             }
 
@@ -1095,14 +1097,14 @@ namespace ODEditor
             {
                 ODentry od = (ODentry)selecteditemsub.Tag;
 
-                if (od.parent.objecttype == ObjectType.ARRAY && od.subindex==0)
+                if (od.parent.objecttype == ObjectType.ARRAY && od.Subindex==0)
                 {
-                    MaxSubIndexFrm frm = new MaxSubIndexFrm(od.nosubindexes);
+                    MaxSubIndexFrm frm = new MaxSubIndexFrm(od.Nosubindexes);
 
                     if(frm.ShowDialog()==DialogResult.OK)
                     {
                         od.defaultvalue = string.Format("0x{0:x2}",frm.maxsubindex);
-                        updateselectedindexdisplay(selectedobject.index, currentmodule);
+                        updateselectedindexdisplay(selectedobject.Index, currentmodule);
                         validateanddisplaydata();
                     }
                 }
@@ -1156,7 +1158,7 @@ namespace ODEditor
             {
                 if (button_save_changes.BackColor == Color.Red)
                 {
-                    if (MessageBox.Show(String.Format("Unsaved changes on Index 0x{0:x4}/{1:x2}\nDo you wish to change objects and loose your changes", lastselectedobject.index, lastselectedobject.subindex), "Unsaved changes",MessageBoxButtons.YesNo) == DialogResult.No)
+                    if (MessageBox.Show(String.Format("Unsaved changes on Index 0x{0:x4}/{1:x2}\nDo you wish to change objects and loose your changes", lastselectedobject.Index, lastselectedobject.Subindex), "Unsaved changes",MessageBoxButtons.YesNo) == DialogResult.No)
                     {
                         return true;
                     }
@@ -1191,8 +1193,6 @@ namespace ODEditor
 
         private ODentry getOD(UInt16 index, UInt16 selectedmodule)
         {
-            ODentry ret = null;
-
             if (selectedmodule == 0)
             {
                 if (eds.ods.ContainsKey(index))
@@ -1211,6 +1211,46 @@ namespace ODEditor
             }
 
             return null; ;
+
+        }
+
+        private void removeSubItemleaveGapToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+              if (selecteditemsub.Tag != null)
+            {
+                ODentry od = (ODentry)selecteditemsub.Tag;
+
+                if (od.parent.objecttype == ObjectType.ARRAY || od.parent.objecttype == ObjectType.REC)
+                {
+                    UInt16 count = EDSsharp.ConvertToUInt16(od.parent.subobjects[0].defaultvalue);
+                    if (count > 0)
+                        count--;
+                    od.parent.subobjects[0].defaultvalue = count.ToString();
+                }
+
+                bool success = od.parent.subobjects.Remove(od.Subindex);
+
+                /*
+                UInt16 countx = 0;
+
+                SortedDictionary<UInt16, ODentry> newlist = new SortedDictionary<ushort, ODentry>();
+
+                foreach (KeyValuePair<UInt16, ODentry> kvp in od.parent.subobjects)
+                {
+                    ODentry sub = kvp.Value;
+                    newlist.Add(countx, sub);
+                    countx++;
+                }
+                
+                od.parent.subobjects = newlist;
+                */
+
+                eds.Dirty = true;
+                updateselectedindexdisplay(selectedobject.Index, currentmodule);
+                validateanddisplaydata();
+            }
+
 
         }
     }

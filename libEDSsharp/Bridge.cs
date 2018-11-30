@@ -40,7 +40,7 @@ namespace libEDSsharp
 
         public Device convert(EDSsharp eds)
         {
-            eds.updatePDOcount();
+            eds.UpdatePDOcount();
 
             Device dev = new Device();
             dev.CANopenObjectList = new Xml2CSharp.CANopenObjectList();
@@ -55,7 +55,7 @@ namespace libEDSsharp
                 // if(od.subindex==-1)
                 {
                     Xml2CSharp.CANopenObject coo = new Xml2CSharp.CANopenObject();
-                    coo.Index = string.Format("{0:x4}", od.index);
+                    coo.Index = string.Format("{0:x4}", od.Index);
                     coo.Name = od.parameter_name;
                     coo.ObjectType = od.objecttype.ToString();
                     coo.Disabled = od.Disabled.ToString().ToLower();
@@ -74,12 +74,13 @@ namespace libEDSsharp
 
                     //if (od.objecttype == ObjectType.ARRAY || od.objecttype == ObjectType.REC)
                     {
-                        coo.SubNumber = od.nosubindexes.ToString(); //-1?? //check me 
+                        coo.SubNumber = od.Nosubindexes.ToString(); //-1?? //check me 
                         coo.CANopenSubObject = new List<Xml2CSharp.CANopenSubObject>();
 
                         foreach (KeyValuePair<UInt16, ODentry> kvp2 in od.subobjects)
                         {
                             ODentry subod = kvp2.Value;
+                            UInt16 subindex = kvp2.Key;
 
                             Xml2CSharp.CANopenSubObject sub = new Xml2CSharp.CANopenSubObject();
 
@@ -89,7 +90,7 @@ namespace libEDSsharp
                             sub.DataType = string.Format("0x{0:x2}", (int)subod.datatype);
                             sub.DefaultValue = subod.defaultvalue;
                             sub.PDOmapping = subod.PDOtype.ToString();
-                            sub.SubIndex = String.Format("{0:x2}", subod.subindex);
+                            sub.SubIndex = String.Format("{0:x2}", subindex);
                             sub.TPDOdetectCOS = subod.TPDODetectCos.ToString().ToLower();
                             coo.CANopenSubObject.Add(sub);
 
@@ -100,7 +101,7 @@ namespace libEDSsharp
                     {
                         //add the datatype field to parent objects if they don't have it already
                         //if the 2nd subobject does not exist then we do nothing.
-                        ODentry sub = od.getsubobject(1);
+                        ODentry sub = od.Getsubobject(1);
                         if (sub != null)
                         {
                             od.datatype = sub.datatype;
@@ -265,7 +266,7 @@ namespace libEDSsharp
             foreach (Xml2CSharp.CANopenObject coo in dev.CANopenObjectList.CANopenObject)
             {
                 ODentry entry = new ODentry();
-                entry.index = Convert.ToUInt16(coo.Index, 16);
+                entry.Index = Convert.ToUInt16(coo.Index, 16);
                 entry.parameter_name = coo.Name;
 
                 if (coo.AccessType != null)
@@ -287,26 +288,26 @@ namespace libEDSsharp
                 {
                     //CanOpenNode Project XML did not correctly set DataTypes for record sets
 
-                    if (entry.index == 0x1018)
+                    if (entry.Index == 0x1018)
                         entry.datatype = DataType.IDENTITY;
 
-                    if (entry.index >= 0x1200 && entry.index < 0x1400) //check me is this the correct range??
+                    if (entry.Index >= 0x1200 && entry.Index < 0x1400) //check me is this the correct range??
                         entry.datatype = DataType.SDO_PARAMETER;
 
 
-                    if (entry.index >= 0x1400 && entry.index < 0x1600) //check me is this the correct range??
+                    if (entry.Index >= 0x1400 && entry.Index < 0x1600) //check me is this the correct range??
                         entry.datatype = DataType.PDO_COMMUNICATION_PARAMETER;
 
 
-                    if (entry.index >= 0x1600 && entry.index < 0x1800) //check me is this the correct range??
+                    if (entry.Index >= 0x1600 && entry.Index < 0x1800) //check me is this the correct range??
                         entry.datatype = DataType.PDO_MAPPING;
 
 
-                    if (entry.index >= 0x1800 && entry.index < 0x1a00) //check me is this the correct range??
+                    if (entry.Index >= 0x1800 && entry.Index < 0x1a00) //check me is this the correct range??
                         entry.datatype = DataType.PDO_COMMUNICATION_PARAMETER;
 
 
-                    if (entry.index >= 0x1a00 && entry.index < 0x1c00) //check me is this the correct range??
+                    if (entry.Index >= 0x1a00 && entry.Index < 0x1c00) //check me is this the correct range??
                         entry.datatype = DataType.PDO_MAPPING;
 
 
@@ -340,20 +341,20 @@ namespace libEDSsharp
                     eds.storageLocation.Add(coo.MemoryType);
                 }
 
-                eds.ods.Add(entry.index, entry);
+                eds.ods.Add(entry.Index, entry);
 
-                if (entry.index == 0x1000 || entry.index == 0x1001 || entry.index == 0x1018)
+                if (entry.Index == 0x1000 || entry.Index == 0x1001 || entry.Index == 0x1018)
                 {
-                    eds.md.objectlist.Add(eds.md.objectlist.Count + 1, entry.index);
+                    eds.md.objectlist.Add(eds.md.objectlist.Count + 1, entry.Index);
                 }
                 else
-                if (entry.index >= 0x2000 && entry.index < 0x6000)
+                if (entry.Index >= 0x2000 && entry.Index < 0x6000)
                 {
-                    eds.mo.objectlist.Add(eds.mo.objectlist.Count + 1, entry.index);
+                    eds.mo.objectlist.Add(eds.mo.objectlist.Count + 1, entry.Index);
                 }
                 else
                 {
-                    eds.oo.objectlist.Add(eds.oo.objectlist.Count + 1, entry.index);
+                    eds.oo.objectlist.Add(eds.oo.objectlist.Count + 1, entry.Index);
                 }
 
 
@@ -363,7 +364,7 @@ namespace libEDSsharp
                     ODentry subentry = new ODentry();
 
                     subentry.parameter_name = coosub.Name;
-                    subentry.index = entry.index;
+                    subentry.Index = entry.Index;
 
                     if (coosub.AccessType != null)
                         subentry.accesstype = (EDSsharp.AccessType)Enum.Parse(typeof(EDSsharp.AccessType), coosub.AccessType);
@@ -376,7 +377,7 @@ namespace libEDSsharp
 
                     subentry.defaultvalue = coosub.DefaultValue;
 
-                    subentry.subindex = Convert.ToUInt16(coosub.SubIndex, 16);
+                    byte subindex = Convert.ToByte(coosub.SubIndex, 16);
 
                     if (coosub.PDOmapping != null)
                         subentry.PDOtype = (PDOMappingType)Enum.Parse(typeof(PDOMappingType), coosub.PDOmapping);
@@ -402,7 +403,7 @@ namespace libEDSsharp
                     }
 
 
-                    entry.subobjects.Add(subentry.subindex, subentry);
+                    entry.subobjects.Add(subindex, subentry);
 
                 }
             }
@@ -448,7 +449,7 @@ namespace libEDSsharp
                         {
                             keypairs.Add(c.CharacteristicName.Label.Text, c.CharacteristicContent.Label.Text);
                         }
-                        catch (Exception e)
+                        catch (Exception)
                         {
                             // Warnings.warning_list.Add("Parsing characteristics failed " + e.ToString());
                         }
@@ -511,7 +512,7 @@ namespace libEDSsharp
                 eds.fi.CreationTime = eds.fi.CreationDateTime.ToString("h:mmtt");
 
             }
-            catch (Exception e) { }
+            catch (Exception) { }
 
             eds.fi.CreatedBy = dev.Other.File.FileCreator;
             eds.fi.exportFolder = dev.Other.File.ExportFolder;
@@ -523,7 +524,7 @@ namespace libEDSsharp
                 eds.fi.ModificationDate = eds.fi.ModificationDateTime.ToString("MM-dd-yyyy");
                 eds.fi.ModificationTime = eds.fi.ModificationDateTime.ToString("h:mmtt");
             }
-            catch (Exception e) { }
+            catch (Exception) { }
 
 
 
@@ -561,7 +562,7 @@ namespace libEDSsharp
 
             //FIX me any other approprate defaults for eds here??
 
-            eds.updatePDOcount();
+            eds.UpdatePDOcount();
 
             return eds;
         }
